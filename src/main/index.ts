@@ -1,14 +1,24 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import os from 'node:os'
 import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 
+import { update } from './update'
+
 let mainWindow: BrowserWindow
+
+// Disable GPU Acceleration for Windows 7
+if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
+
+// Set application name for Windows 10+ notifications
+if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
+    title: 'MoneyMap',
     show: false,
     autoHideMenuBar: true,
     // ...(process.platform === 'linux' ? { icon } : {}),
@@ -27,6 +37,9 @@ function createWindow(): void {
     }
 
     mainWindow.show()
+
+    // Maximize the Window after mainWindow.show() is triggered
+    mainWindow.maximize()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -41,6 +54,9 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // Auto Update
+  update(mainWindow)
 }
 
 // This method will be called when Electron has finished
@@ -73,8 +89,21 @@ app.whenReady().then(() => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    const allWindows = BrowserWindow.getAllWindows()
+    if (allWindows.length) {
+      allWindows[0].focus()
+    } else {
+      createWindow()
+    }
   })
+})
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    // Focus on the main window if the user tried to open another
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.focus()
+  }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -88,12 +117,3 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
-
-// Event Listner for auto-updater to Inform/Notify the User about the Update
-autoUpdater.on('update-available', () => {
-  mainWindow.webContents.send('update_available')
-})
-
-autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update_downloaded')
-})

@@ -1,4 +1,8 @@
 import Versions from './components/Versions'
+
+// Update
+import Update from './components/update'
+
 import electronLogo from './assets/electron.svg'
 
 function App(): JSX.Element {
@@ -28,6 +32,8 @@ function App(): JSX.Element {
         </div>
       </div>
       <Versions></Versions>
+
+      <Update />
     </>
   )
 }

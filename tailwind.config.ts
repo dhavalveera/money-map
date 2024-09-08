@@ -1,5 +1,11 @@
 import type { Config } from 'tailwindcss'
 
+// Flowbite-React
+import {
+  content as flowbiteReactContent,
+  plugin as flowbiteReactPlugin
+} from 'flowbite-react/tailwind'
+
 export default {
   content: [
     './src/renderer/index.html',
@@ -8,7 +14,9 @@ export default {
     './src/renderer/src/**/**/*.{js,jsx,ts,tsx}',
     './src/renderer/src/**/**/**/*.{js,jsx,ts,tsx}',
     './src/renderer/src/**/**/**/**/*.{js,jsx,ts,tsx}',
-    './src/renderer/src/**/**/**/**/**/*.{js,jsx,ts,tsx}'
+    './src/renderer/src/**/**/**/**/**/*.{js,jsx,ts,tsx}',
+
+    flowbiteReactContent()
   ],
   theme: {
     extend: {
@@ -33,8 +41,12 @@ export default {
       },
       colors: {
         primaryColor: '#2fb34b'
+      },
+      backgroundImage: {
+        'custom-gradient':
+          'linear-gradient(to right, rgb(130, 86, 208) 0%, var(--primary-color) 100%)'
       }
     }
   },
-  plugins: []
+  plugins: [flowbiteReactPlugin()]
 } satisfies Config
